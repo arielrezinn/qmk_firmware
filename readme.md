@@ -34,3 +34,8 @@ QMK is developed and maintained by Jack Humbert of OLKB with contributions from 
 ## Official Website
 
 [qmk.fm](https://qmk.fm) is the official website of QMK, where you can find links to this page, the documentation, and the keyboards supported by QMK.
+
+## Ariel's Personal Notes
+To build the default keymap for my Keychron K6 Pro, enter:
+
+  `qmk compile -kb keychron/k6_pro/ansi/rgb -km default`
