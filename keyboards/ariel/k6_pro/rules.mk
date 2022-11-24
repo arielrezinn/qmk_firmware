@@ -31,10 +31,4 @@ OPT_DEFS += -DNO_USB_STARTUP_CHECK -DENABLE_FACTORY_TEST
 CUSTOM_MATRIX = lite
 SRC += matrix.c
 
-# Enable RGB on the board
-RGB_MATRIX_ENABLE = yes
-RGB_MATRIX_DRIVER = CKLED2001
 
-# Try to get linking and compiling to work
-VIA_ENABLE = yes
-OPT_DEFS += -DDYNAMIC_KEYMAP_LAYER_COUNT=5
