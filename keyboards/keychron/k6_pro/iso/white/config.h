@@ -18,14 +18,18 @@
 /* LED matrix driver configuration */
 #    define DRIVER_COUNT 1
 #    define DRIVER_ADDR_1 0b1110100
-#    define DRIVER_LED_TOTAL 69
+#    define LED_MATRIX_LED_COUNT 69
 
 /* Set to infinit, which is use in USB mode by default */
-#    define LED_DISABLE_TIMEOUT LED_DISABLE_TIME_INFINITE
+#    define LED_MATRIX_TIMEOUT LED_MATRIX_TIMEOUT_INFINITE
 /* Allow shutdown of led driver to save power */
 #    define LED_MATRIX_DRIVER_SHUTDOWN_ENABLE
 /* Turn off backlight on low brightness to save power */
 #    define LED_MATRIX_BRIGHTNESS_TURN_OFF_VAL 32
+
+#    define DIM_CAPS_LOCK
+#    define CAPS_LOCK_INDEX 30
+#    define LOW_BAT_IND_INDEX 62
 
 /* LED Matrix Animation modes. Explicitly enabled
  * For full list of effects, see:
@@ -64,8 +68,5 @@
 
 /* Set LED driver current */
 #    define CKLED2001_CURRENT_TUNE  { 0x60, 0x60, 0x60, 0x60, 0x60, 0x60, 0x60, 0x60, 0x60, 0x60, 0x60, 0x60 }
-
-#    define DIM_CAPS_LOCK
-#    define CAPS_LOCK_INDEX    30
 
 #endif

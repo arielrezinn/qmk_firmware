@@ -39,8 +39,8 @@ enum {
     CKBT51_CMD_SEND_KB_NKRO  = 0x12,
     CKBT51_CMD_SEND_CONSUMER = 0x13,
     CKBT51_CMD_SEND_SYSTEM   = 0x14,
-    CKBT51_CMD_SEND_FN       = 0x15,    // Not used currently
-    CKBT51_CMD_SEND_MOUSE    = 0x16,    // Not used currently
+    CKBT51_CMD_SEND_FN       = 0x15, // Not used currently
+    CKBT51_CMD_SEND_MOUSE    = 0x16, // Not used currently
     CKBT51_CMD_SEND_BOOT_KB  = 0x17,
     /* Bluetooth connections */
     CKBT51_CMD_PAIRING        = 0x21,
@@ -51,14 +51,14 @@ enum {
     /* Battery */
     CKBT51_CMD_BATTERY_MANAGE = 0x31,
     CKBT51_CMD_UPDATE_BAT_LVL = 0x32,
-     /* Set/get parameters */
-    CKBT51_CMD_GET_MODULE_INFO   = 0x40,
-    CKBT51_CMD_SET_CONFIG        = 0x41,
-    CKBT51_CMD_GET_CONFIG        = 0x42,
-    CKBT51_CMD_SET_BDA           = 0x43,
-    CKBT51_CMD_GET_BDA           = 0x44,
-    CKBT51_CMD_SET_NAME          = 0x45,
-    CKBT51_CMD_GET_NAME          = 0x46,
+    /* Set/get parameters */
+    CKBT51_CMD_GET_MODULE_INFO = 0x40,
+    CKBT51_CMD_SET_CONFIG      = 0x41,
+    CKBT51_CMD_GET_CONFIG      = 0x42,
+    CKBT51_CMD_SET_BDA         = 0x43,
+    CKBT51_CMD_GET_BDA         = 0x44,
+    CKBT51_CMD_SET_NAME        = 0x45,
+    CKBT51_CMD_GET_NAME        = 0x46,
     /* DFU */
     CKBT51_CMD_GET_DFU_VER      = 0x60,
     CKBT51_CMD_HAND_SHAKE_TOKEN = 0x61,
@@ -69,10 +69,11 @@ enum {
     /* Factory test */
     CKBT51_CMD_FACTORY_RESET = 0x71,
     CKBT51_CMD_INT_PIN_TEST  = 0x72,
+    CKBT51_CMD_RADIO_TEST    = 0x73,
     /* Event */
     CKBT51_EVT_CKBT51_CMD_RECEIVED = 0xA1,
-    CKBT51_EVT_OTA_RSP        = 0xA3,
-    CKBT51_CONNECTION_EVT_ACK = 0xA4,
+    CKBT51_EVT_OTA_RSP             = 0xA3,
+    CKBT51_CONNECTION_EVT_ACK      = 0xA4,
 };
 
 enum {
@@ -138,11 +139,14 @@ void ckbt51_init(bool wakeup_from_low_power_mode) {
     writePinHigh(CKBT51_INT_INPUT_PIN);
 }
 
-void ckbt51_send_cmd(uint8_t* payload, uint8_t len, bool ack_enable) {
-    static uint8_t sn = 1;
+void ckbt51_send_cmd(uint8_t* payload, uint8_t len, bool ack_enable, bool retry) {
+    static uint8_t sn = 0;
     uint8_t        i;
     uint8_t        pkt[PACKET_MAX_LEN] = {0};
     memset(pkt, 0, PACKET_MAX_LEN);
+
+    if (!retry) ++sn;
+    if (sn == 0) ++sn;
 
     systime_t start = 0;
 
@@ -161,15 +165,13 @@ void ckbt51_send_cmd(uint8_t* payload, uint8_t len, bool ack_enable) {
     pkt[i++] = ack_enable ? 0x56 : 0x55;
     pkt[i++] = len + 2;
     pkt[i++] = ~(len + 2) & 0xFF;
-    pkt[i++] = sn++;
+    pkt[i++] = sn;
     memcpy(pkt + i, payload, len);
     i += len;
     pkt[i++] = checksum & 0xFF;
     pkt[i++] = (checksum >> 8) & 0xFF;
 
     sdWrite(&BT_DRIVER, pkt, i);
-
-    if (sn == 0) sn = 1;
 }
 
 void ckbt51_send_keyboard(uint8_t* report) {
@@ -180,7 +182,7 @@ void ckbt51_send_keyboard(uint8_t* report) {
     memcpy(payload + i, report, 8);
     i += 8;
 
-    ckbt51_send_cmd(payload, i, true);
+    ckbt51_send_cmd(payload, i, true, false);
 }
 
 void ckbt51_send_nkro(uint8_t* report) {
@@ -191,7 +193,7 @@ void ckbt51_send_nkro(uint8_t* report) {
     memcpy(payload + i, report, 20);         // NKRO report lenght is limited to 20 bytes
     i += 20;
 
-    ckbt51_send_cmd(payload, i, true);
+    ckbt51_send_cmd(payload, i, true, false);
 }
 
 void ckbt51_send_consumer(uint16_t report) {
@@ -203,7 +205,7 @@ void ckbt51_send_consumer(uint16_t report) {
     payload[i++] = ((report) >> 8) & 0xFF;
     i += 4;   // QMK doesn't send multiple consumer reports, just skip 2nd and 3rd consumer reports
 
-    ckbt51_send_cmd(payload, i, true);
+    ckbt51_send_cmd(payload, i, true, false);
 }
 
 void ckbt51_send_system(uint16_t report) {
@@ -213,7 +215,7 @@ void ckbt51_send_system(uint16_t report) {
     payload[i++] = CKBT51_CMD_SEND_SYSTEM;
     payload[i++] = report & 0xFF;
 
-    ckbt51_send_cmd(payload, i, true);
+    ckbt51_send_cmd(payload, i, true, false);
 }
 
 void ckbt51_send_mouse(uint8_t* report) {
@@ -229,7 +231,7 @@ void ckbt51_send_mouse(uint8_t* report) {
     payload[i++] = report[4];       // V wheel
     payload[i++] = report[5];       // H wheel
 
-    ckbt51_send_cmd(payload, i, false);
+    ckbt51_send_cmd(payload, i, false, false);
 }
 
 /* Send ack to connection event, bluetooth module will retry 2 times if no ack received */
@@ -239,7 +241,7 @@ void ckbt51_send_conn_evt_ack(void) {
 
     payload[i++] = CKBT51_CONNECTION_EVT_ACK;
 
-    ckbt51_send_cmd(payload, i, false);
+    ckbt51_send_cmd(payload, i, false, false);
 }
 
 void ckbt51_become_discoverable(uint8_t host_idx, void* param) {
@@ -265,7 +267,7 @@ void ckbt51_become_discoverable(uint8_t host_idx, void* param) {
         i += strlen(p->leName);
     }
 
-    ckbt51_send_cmd(payload, i, true);
+    ckbt51_send_cmd(payload, i, true, false);
 }
 
 /* Timeout : 2 ~ 255 seconds */
@@ -278,7 +280,7 @@ void ckbt51_connect(uint8_t hostIndex, uint16_t timeout) {
     payload[i++] = timeout & 0xFF;      // Timeout
     payload[i++] = (timeout >> 8) & 0xFF;
 
-    ckbt51_send_cmd(payload, i, true);
+    ckbt51_send_cmd(payload, i, true, false);
 }
 
 void ckbt51_disconnect(void) {
@@ -288,7 +290,7 @@ void ckbt51_disconnect(void) {
     payload[i++] = CKBT51_CMD_DISCONNECT;
     payload[i++] = 0;                      // Sleep mode
 
-    ckbt51_send_cmd(payload, i, true);
+    ckbt51_send_cmd(payload, i, true, false);
 }
 
 void ckbt51_switch_host(uint8_t hostIndex) {
@@ -298,7 +300,7 @@ void ckbt51_switch_host(uint8_t hostIndex) {
     payload[i++] = CKBT51_CMD_SWITCH_HOST;
     payload[i++] = hostIndex;
 
-    ckbt51_send_cmd(payload, i, true);
+    ckbt51_send_cmd(payload, i, true, false);
 }
 
 void ckbt51_read_state_reg(uint8_t reg, uint8_t len) {
@@ -310,7 +312,7 @@ void ckbt51_read_state_reg(uint8_t reg, uint8_t len) {
     payload[i++]              = len;
 
     // TODO
-    ckbt51_send_cmd(payload, i, false);
+    ckbt51_send_cmd(payload, i, false, false);
 }
 
 void ckbt51_get_info(module_info_t* info) {
@@ -318,7 +320,7 @@ void ckbt51_get_info(module_info_t* info) {
     memset(payload, 0, PACKET_MAX_LEN);
 
     payload[i++] = CKBT51_CMD_GET_MODULE_INFO;
-    ckbt51_send_cmd(payload, i, false);
+    ckbt51_send_cmd(payload, i, false, false);
 }
 
 void ckbt51_set_param(module_param_t* param) {
@@ -329,7 +331,7 @@ void ckbt51_set_param(module_param_t* param) {
     memcpy(payload + i, param, sizeof(module_param_t));
     i += sizeof(module_param_t);
 
-    ckbt51_send_cmd(payload, i, false);
+    ckbt51_send_cmd(payload, i, false, false);
 }
 
 void ckbt51_get_param(module_param_t* param) {
@@ -338,7 +340,7 @@ void ckbt51_get_param(module_param_t* param) {
 
     payload[i++] = CKBT51_CMD_GET_CONFIG;
 
-    ckbt51_send_cmd(payload, i, false);
+    ckbt51_send_cmd(payload, i, false, false);
 }
 
 void ckbt51_set_local_name(const char* name) {
@@ -349,16 +351,16 @@ void ckbt51_set_local_name(const char* name) {
     payload[i++] = CKBT51_CMD_SET_NAME;
     memcpy(payload + i, name, len);
     i += len;
-    ckbt51_send_cmd(payload, i, false);
+    ckbt51_send_cmd(payload, i, false, false);
 }
 
-void ckbt51_get_local_name(char* name) {
+void ckbt51_get_local_name(void) {
     uint8_t i = 0;
     memset(payload, 0, PACKET_MAX_LEN);
 
     payload[i++] = CKBT51_CMD_GET_NAME;
 
-    ckbt51_send_cmd(payload, i, false);
+    ckbt51_send_cmd(payload, i, false, false);
 }
 
 void ckbt51_factory_reset(void) {
@@ -367,7 +369,7 @@ void ckbt51_factory_reset(void) {
 
     payload[i++] = CKBT51_CMD_FACTORY_RESET;
 
-    ckbt51_send_cmd(payload, i, false);
+    ckbt51_send_cmd(payload, i, false, false);
 }
 
 void ckbt51_int_pin_test(bool enable) {
@@ -376,7 +378,17 @@ void ckbt51_int_pin_test(bool enable) {
     payload[i++] = CKBT51_CMD_INT_PIN_TEST;
     payload[i++] = enable;
 
-    ckbt51_send_cmd(payload, i, false);
+    ckbt51_send_cmd(payload, i, false, false);
+}
+
+void ckbt51_radio_test(uint8_t channel) {
+    uint8_t i = 0;
+    memset(payload, 0, PACKET_MAX_LEN);
+    payload[i++] = CKBT51_CMD_RADIO_TEST;
+    payload[i++] = channel;
+    payload[i++] = 0;
+
+    ckbt51_send_cmd(payload, i, false, false);
 }
 
 void ckbt51_dfu_tx(uint8_t rsp, uint8_t* data, uint8_t len, uint8_t sn) {
@@ -424,9 +436,16 @@ void ckbt51_dfu_rx(uint8_t* data, uint8_t length) {
 
         /* Verify checksum */
         if ((checksum & 0xFF) != payload[payload_len - 2] || checksum >> 8 != payload[payload_len - 1]) return;
+        static uint8_t sn = 0;
+
+        bool retry = true;
+        if (sn != data[4]) {
+            sn = data[4];
+            retry = false;
+        }
 
         if ((payload[0] & 0xF0) == 0x60) {
-            ckbt51_send_cmd(payload, payload_len - 2, data[1] == 0x56);
+            ckbt51_send_cmd(payload, payload_len - 2, data[1] == 0x56, retry);
         }
     }
 }
@@ -583,7 +602,7 @@ void ckbt51_task(void) {
         for (int i = 0; i < len - 2; i++) checksum += buf[i];
 
         if ((checksum & 0xff) == buf[len - 2] && ((checksum >> 8) & 0xff) == buf[len - 1]) {
-            ckbt51_event_handler(buf[0], buf + 1, len - 2, sn);
+            ckbt51_event_handler(buf[0], buf + 1, len - 3, sn);
         } else {
             // TODO: Error handle
         }
