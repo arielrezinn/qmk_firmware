@@ -1,4 +1,4 @@
-/* Copyright 2023 @ lokher (https://www.keychron.com)
+/* Copyright 2020 QMK
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -13,31 +13,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
- 
-#include "hal.h"
 
-#if (HAL_USE_RTC)
+#pragma once
 
-#    include "rtc_timer.h"
+#define HAL_USE_I2C TRUE
 
-void rtc_timer_init(void) {
-    rtc_timer_clear();
-}
-
-void rtc_timer_clear(void) {
-    RTCDateTime tm = {0, 0, 0, 0, 0, 0};
-    rtcSetTime(&RTCD1, &tm);
-}
-
-uint32_t rtc_timer_read_ms(void) {
-    RTCDateTime tm;
-    rtcGetTime(&RTCD1, &tm);
-
-    return tm.millisecond;
-}
-
-uint32_t rtc_timer_elapsed_ms(uint32_t last) {
-    return TIMER_DIFF_32(rtc_timer_read_ms(), last);
-}
-
+#ifdef KC_BLUETOOTH_ENABLE
+#    define PAL_USE_CALLBACKS TRUE
+#    define HAL_USE_SERIAL TRUE
+#    define HAL_USE_RTC TRUE
 #endif
+
+#include_next <halconf.h>
