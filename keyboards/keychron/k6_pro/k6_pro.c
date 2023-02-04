@@ -60,7 +60,13 @@ static void pairing_key_timer_cb(void *arg) {
 
 bool dip_switch_update_kb(uint8_t index, bool active) {
     if (index == 0) {
-        default_layer_set(1UL << (active ? 1 : 0));
+        // -------------------THIS IS THE DEFAULT SETTING-------------------
+        // Mac/iOS side of switch is layer 0 and Win/Android side of switch is layer 1
+        // default_layer_set(1UL << (active ? 1 : 0));
+
+        // -------------------THIS IS MY CUSTOM SETTING-------------------
+        // Mac/iOS side of switch is layer 0 and Win/Android side of switch is layer 3
+        default_layer_set(1UL << (active ? 3 : 0));
     }
     dip_switch_update_user(index, active);
 
@@ -110,6 +116,26 @@ bool process_record_kb(uint16_t keycode, keyrecord_t *record) {
                 register_code(KC_LGUI);
                 register_code(KC_SPACE);
                 siri_timer_buffer = sync_timer_read32() | 1;
+            }
+            return false; // Skip all further processing of this key
+        case KC_USR1:
+            if (record->event.pressed) {
+                SEND_STRING("Test1");
+            }
+            return false; // Skip all further processing of this key
+        case KC_PAS1:
+            if (record->event.pressed) {
+                SEND_STRING("Test2");
+            }
+            return false; // Skip all further processing of this key
+        case KC_USR2:
+            if (record->event.pressed) {
+                SEND_STRING("Test3");
+            }
+            return false; // Skip all further processing of this key
+        case KC_PAS2:
+            if (record->event.pressed) {
+                SEND_STRING("Test4");
             }
             return false; // Skip all further processing of this key
 #ifdef KC_BLUETOOTH_ENABLE

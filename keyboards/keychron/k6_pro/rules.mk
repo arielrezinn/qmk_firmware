@@ -1,6 +1,6 @@
 # MCU name
 MCU = STM32L432
- 
+
 # Bootloader selection
 BOOTLOADER = stm32-dfu
 
@@ -23,6 +23,7 @@ BLUETOOTH_DRIVER = custom
 AUDIO_ENABLE = no           # Audio output on port C6
 DIP_SWITCH_ENABLE = yes
 RAW_ENABLE = yes
+TAP_DANCE_ENABLE = yes
 
 # Enter lower-power sleep mode when on the ChibiOS idle thread
 OPT_DEFS += -DCORTEX_ENABLE_WFI_IDLE=TRUE

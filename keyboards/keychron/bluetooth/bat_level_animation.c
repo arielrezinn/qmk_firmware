@@ -11,11 +11,11 @@
 #include "eeprom.h"
 
 #ifndef BAT_LEVEL_GROWING_INTERVAL
-#    define BAT_LEVEL_GROWING_INTERVAL 150
+#    define BAT_LEVEL_GROWING_INTERVAL 80
 #endif
 
 #ifndef BAT_LEVEL_ON_INTERVAL
-#    define BAT_LEVEL_ON_INTERVAL 3000
+#    define BAT_LEVEL_ON_INTERVAL 1000
 #endif
 
 #ifdef LED_MATRIX_ENABLE
