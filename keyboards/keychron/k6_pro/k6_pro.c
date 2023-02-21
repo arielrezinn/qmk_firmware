@@ -29,8 +29,12 @@
 #    include "factory_test.h"
 #endif
 
-#define POWER_ON_LED_DURATION 3000
+#define MACRO_INPUT_1 "Test1"
+#define MACRO_INPUT_2 "Test2"
+#define MACRO_INPUT_3 "Test3"
+#define MACRO_INPUT_4 "Test4"
 
+#define POWER_ON_LED_DURATION 3000
 typedef struct PACKED {
     uint8_t len;
     uint8_t keycode[3];
@@ -65,8 +69,8 @@ bool dip_switch_update_kb(uint8_t index, bool active) {
         // default_layer_set(1UL << (active ? 1 : 0));
 
         // -------------------THIS IS MY CUSTOM SETTING-------------------
-        // Mac/iOS side of switch is layer 0 and Win/Android side of switch is layer 3
-        default_layer_set(1UL << (active ? 3 : 0));
+        // Mac/iOS side of switch is layer 0 and Win/Android side of switch is layer 2
+        default_layer_set(1UL << (active ? 2 : 0));
     }
     dip_switch_update_user(index, active);
 
@@ -120,22 +124,22 @@ bool process_record_kb(uint16_t keycode, keyrecord_t *record) {
             return false; // Skip all further processing of this key
         case KC_USR1:
             if (record->event.pressed) {
-                SEND_STRING("Test1");
+                SEND_STRING(MACRO_INPUT_1);
             }
             return false; // Skip all further processing of this key
         case KC_PAS1:
             if (record->event.pressed) {
-                SEND_STRING("Test2");
+                SEND_STRING(MACRO_INPUT_2);
             }
             return false; // Skip all further processing of this key
         case KC_USR2:
             if (record->event.pressed) {
-                SEND_STRING("Test3");
+                SEND_STRING(MACRO_INPUT_3);
             }
             return false; // Skip all further processing of this key
         case KC_PAS2:
             if (record->event.pressed) {
-                SEND_STRING("Test4");
+                SEND_STRING(MACRO_INPUT_4);
             }
             return false; // Skip all further processing of this key
 #ifdef KC_BLUETOOTH_ENABLE
