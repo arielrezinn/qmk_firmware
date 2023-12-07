@@ -1,5 +1,10 @@
 # Quantum Mechanical Keyboard Firmware
 
+# Ariel's Personal Notes
+To build the default keymap for my Keychron K6 Pro, enter:
+
+  `qmk compile -kb keychron/k6_pro/ansi/rgb -km default`
+
 [![Current Version](https://img.shields.io/github/tag/qmk/qmk_firmware.svg)](https://github.com/qmk/qmk_firmware/tags)
 [![Discord](https://img.shields.io/discord/440868230475677696.svg)](https://discord.gg/Uq7gcHh)
 [![Docs Status](https://img.shields.io/badge/docs-ready-orange.svg)](https://docs.qmk.fm)
