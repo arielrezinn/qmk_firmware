@@ -29,10 +29,10 @@
 #    include "factory_test.h"
 #endif
 
-#define MACRO_INPUT_1 "Test1"
-#define MACRO_INPUT_2 "Test2"
-#define MACRO_INPUT_3 "Test3"
-#define MACRO_INPUT_4 "Test4"
+#define MACRO_INPUT_1 "idnums"
+#define MACRO_INPUT_2 "password"
+#define MACRO_INPUT_3 "raidnums"
+#define MACRO_INPUT_4 "rapassword"
 
 #define POWER_ON_LED_DURATION 3000
 typedef struct PACKED {
