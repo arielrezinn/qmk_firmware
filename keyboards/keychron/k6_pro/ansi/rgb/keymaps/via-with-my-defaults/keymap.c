@@ -18,13 +18,13 @@
 
 // Tap Dance declaration(s)
 enum {
-    G_ESC,
+    G_ESC = 0
 };
 
 // Tap Dance definition(s)
-qk_tap_dance_action_t tap_dance_actions[] = {
+tap_dance_action_t tap_dance_actions[] = {
     // Tap once for Escape, twice for Grave
-    [G_ESC] = ACTION_TAP_DANCE_DOUBLE(KC_ESCAPE, KC_GRAVE),
+    [G_ESC] = ACTION_TAP_DANCE_DOUBLE(KC_ESC, KC_GRV)
 };
 
 // clang-format off
